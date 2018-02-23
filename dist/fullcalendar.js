@@ -7062,8 +7062,8 @@ var DayGrid = /** @class */ (function (_super) {
                 col++;
             }
         };
-        if (levelLimit && levelLimit < rowStruct.segLevels.length) {
-            levelSegs = rowStruct.segLevels[levelLimit - 1];
+        if (levelLimit && levelLimit-1 < rowStruct.segLevels.length) {
+            levelSegs = rowStruct.segLevels[levelLimit-2];
             cellMatrix = rowStruct.cellMatrix;
             limitedNodes = rowStruct.tbodyEl.children().slice(levelLimit) // get level <tr> elements past the limit
                 .addClass('fc-limited').get(); // hide elements and get a simple DOM-nodes array
@@ -7074,12 +7074,8 @@ var DayGrid = /** @class */ (function (_super) {
                 // determine *all* segments below `seg` that occupy the same columns
                 colSegsBelow = [];
                 totalSegsBelow = 0;
-                // this.getCellSegs(row, col, levelLimit);
-                // console.log(row)
-                // console.log(col)
-                // console.log(levelLimit)
                 while (col <= seg.rightCol) {
-                    segsBelow = this.getCellSegs(row, col, levelLimit);
+                    segsBelow = this.getCellSegs(row, col, levelLimit-1);
                     colSegsBelow.push(segsBelow);
                     totalSegsBelow += segsBelow.length;
                     col++;
@@ -7092,11 +7088,18 @@ var DayGrid = /** @class */ (function (_super) {
                     for (j = 0; j < colSegsBelow.length; j++) {
                         moreTd = $('<td class="fc-more-cell"/>').attr('rowspan', rowspan);                        
                         segsBelow = colSegsBelow[j];
+                        var numData = "";
+                        for (k=0; k < totalSegsBelow; k++) {
+                            if (segsBelow[k]){
+                                var numText = segsBelow[k].el[0].text;
+                                var splitNumText = numText.split(" ");
+                                var getNum = splitNumText[1];
 
-                        var numText = segsBelow[totalSegsBelow-1].el[0].text;
-                        var splitNumText = numText.split(" ");
-                        var numData = splitNumText[1];
-
+                                if (getNum == parseInt(getNum)) {
+                                    var numData = getNum
+                                }    
+                            }                                                    
+                        }                        
                         moreLink = this.renderMoreLink(row, seg.leftCol + j, [seg].concat(segsBelow), numData // count seg as hidden too
                         );
                         moreWrap = $('<div/>').append(moreLink);
@@ -7148,7 +7151,7 @@ var DayGrid = /** @class */ (function (_super) {
                 // rescope the segments to be within the cell's date
                 var reslicedAllSegs = _this.resliceDaySegs(allSegs, date);
                 setTimeout(() => {
-                    _this.showSegPopover(row, col, moreEl, reslicedAllSegs);
+                    _this.showSegPopover(row, col, dayEl, reslicedAllSegs);
                 }, 0)
                 
             }
@@ -7182,7 +7185,7 @@ var DayGrid = /** @class */ (function (_super) {
     DayGrid.prototype.showSegPopover = function (row, col, moreLink, segs) {
         var _this = this;
         var view = this.view;
-        var moreWrap = moreLink.parent(); // the <div> wrapper around the <a>
+        var moreWrap = moreLink; // the <div> wrapper around the <a>
         var topEl; // the element we want to match the top coordinate of
         var options;
         if (this.rowCnt === 1) {
@@ -7295,7 +7298,6 @@ var DayGrid = /** @class */ (function (_super) {
     DayGrid.prototype.getCellSegs = function (row, col, startLevel) {
         var segMatrix = this.eventRenderer.rowStructs[row].segMatrix;
         var level = startLevel || 0;
-        // console.log(segMatrix)
         var segs = [];
         var seg;
         while (level < segMatrix.length) {
@@ -10180,8 +10182,6 @@ var Calendar = /** @class */ (function () {
         if (source) {
             this.eventManager.addSource(source);
         }
-        console.log('addEventSource function')
-        // console.log(popoverData)
     };
     Calendar.prototype.removeEventSources = function (sourceMultiQuery) {
         var eventManager = this.eventManager;
@@ -14357,9 +14357,6 @@ var DayGridEventRenderer = /** @class */ (function (_super) {
         var j;
         var seg;
         var td;
-        function getMoreDataNum(num){
-            // console.log(num);
-        }
         // populates empty cells from the current column (`col`) to `endCol`
         function emptyCellsUntil(endCol) {
             while (col < endCol) {
