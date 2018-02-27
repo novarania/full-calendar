@@ -7051,19 +7051,19 @@ var DayGrid = /** @class */ (function (_super) {
         // Iterates through empty level cells and places "more" links inside if need be
         var emptyCellsUntil = function (endCol) {
             while (col < endCol) {
-                segsBelow = _this.getCellSegs(row, col, levelLimit);
-                if (segsBelow.length) {
-                    td = cellMatrix[levelLimit - 1][col];
-                    moreLink = _this.renderMoreLink(row, col, segsBelow);
-                    moreWrap = $('<div/>').append(moreLink);
-                    td.append(moreWrap);
-                    moreNodes.push(moreWrap[0]);
-                }
+                // segsBelow = _this.getCellSegs(row, col, levelLimit);
+                // if (segsBelow.length) {
+                //     td = cellMatrix[levelLimit - 1][col];
+                //     moreLink = _this.renderMoreLink(row, col, segsBelow);
+                //     moreWrap = $('<div/>').append(moreLink);
+                //     td.append(moreWrap);
+                //     moreNodes.push(moreWrap[0]);
+                // }
                 col++;
             }
         };
         if (levelLimit && levelLimit-1 < rowStruct.segLevels.length) {
-            levelSegs = rowStruct.segLevels[levelLimit-2];
+            levelSegs = rowStruct.segLevels[levelLimit-1];
             cellMatrix = rowStruct.cellMatrix;
             limitedNodes = rowStruct.tbodyEl.children().slice(levelLimit) // get level <tr> elements past the limit
                 .addClass('fc-limited').get(); // hide elements and get a simple DOM-nodes array
@@ -7080,7 +7080,7 @@ var DayGrid = /** @class */ (function (_super) {
                     totalSegsBelow += segsBelow.length;
                     col++;
                 }
-                if (totalSegsBelow) {
+                if (totalSegsBelow > 0) {
                     td = cellMatrix[levelLimit - 1][seg.leftCol]; // the segment's parent cell
                     rowspan = td.attr('rowspan') || 1;
                     segMoreNodes = [];
@@ -7088,24 +7088,27 @@ var DayGrid = /** @class */ (function (_super) {
                     for (j = 0; j < colSegsBelow.length; j++) {
                         moreTd = $('<td class="fc-more-cell"/>').attr('rowspan', rowspan);                        
                         segsBelow = colSegsBelow[j];
-                        var numData = "";
+                        var numData = "";                        
                         for (k=0; k < totalSegsBelow; k++) {
                             if (segsBelow[k]){
                                 var numText = segsBelow[k].el[0].text;
                                 var splitNumText = numText.split(" ");
-                                var getNum = splitNumText[1];
+                                var getNum = splitNumText[3];
 
                                 if (getNum == parseInt(getNum)) {
                                     var numData = getNum
                                 }    
                             }                                                    
-                        }                        
-                        moreLink = this.renderMoreLink(row, seg.leftCol + j, [seg].concat(segsBelow), numData // count seg as hidden too
-                        );
-                        moreWrap = $('<div/>').append(moreLink);
-                        moreTd.append(moreWrap);
-                        segMoreNodes.push(moreTd[0]);
-                        moreNodes.push(moreTd[0]);
+                        }     
+                        if (numData){
+                            moreLink = this.renderMoreLink(row, seg.leftCol + j, [seg].concat(segsBelow), numData // count seg as hidden too
+                            );
+                            moreWrap = $('<div/>').append(moreLink);
+                            moreTd.append(moreWrap);
+                            segMoreNodes.push(moreTd[0]);
+                            moreNodes.push(moreTd[0]);
+                        }                   
+                       
                     }
                     td.addClass('fc-limited').after($(segMoreNodes)); // hide original <td> and inject replacements
                     limitedNodes.push(td[0]);
@@ -7290,7 +7293,12 @@ var DayGrid = /** @class */ (function (_super) {
             return opt(num);
         }
         else {
-            return num +"+ "+ opt ;
+            // if (num){
+                return num +"+ "+ opt ;
+            // }else{
+            //     return "";
+            // }
+            
         }
     };
     // Returns segments within a given cell.
